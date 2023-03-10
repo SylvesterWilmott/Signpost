@@ -145,7 +145,8 @@ body {
   position: relative;
 }
 
-.table-row:after {
+.table-row:after,
+.table-row-group:after {
   content: "";
   position: absolute;
   width: 100%;
@@ -155,7 +156,8 @@ body {
   box-shadow: inset 0px -0.5px 0px 0px var(--stroke-light);
 }
 
-.table-row:last-child:after {
+.table-row:last-child:after,
+.table-row-group:last-child:after {
   content: "";
   display: none;
 }
@@ -302,7 +304,6 @@ input[type=radio] {
   user-select: none;
   width: 100%;
   margin-bottom: 8px;
-  font-weight: 500;
 }
 
 button {
