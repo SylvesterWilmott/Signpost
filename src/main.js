@@ -240,10 +240,31 @@ function getTruncatedFilename (name, ext) {
   return `${name}${ext}`
 }
 
-function clearFavourites () {
-  const updatedFavourites = []
-  storage.set('favourites', updatedFavourites)
-  shell.beep()
+function clearFavourites (winId) {
+  if (storedData.favourites.length === 0) return
+
+  let parentWindow = null
+  if (winId) parentWindow = BrowserWindow.fromId(winId)
+
+  dialog
+    .showMessageBox(parentWindow, {
+      message: strings.CLEAR_QUESTION_TITLE,
+      detail: strings.CLEAR_QUESTION_DETAIL,
+      buttons: [strings.CLEAR_QUESTION_BUTTON_POSITIVE, strings.CLEAR_QUESTION_BUTTON_NEGATIVE],
+      type: 'warning',
+      defaultId: 1,
+      cancelId: 1
+    })
+    .then((result) => {
+      if (result.response === 0) {
+        const updatedFavourites = []
+        storage.set('favourites', updatedFavourites)
+        shell.beep()
+      }
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 }
 
 async function getFavouriteMenuItem (obj, i) {
@@ -466,7 +487,7 @@ function registerListeners () {
 
     switch (id) {
       case 'clear_all':
-        clearFavourites()
+        clearFavourites(e.sender.id)
         break
       case 'close_welcome_window':
         if (welcomeWin) {

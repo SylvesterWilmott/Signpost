@@ -30,5 +30,9 @@
   "TAB_GENERAL": "General",
   "TAB_ADVANCED": "Advanced",
   "LEFT_CLICK": "Click to Reveal Files in Finder",
-  "OPEN_AT_LOGIN": "Open at Login"
+  "OPEN_AT_LOGIN": "Open at Login",
+  "CLEAR_QUESTION_TITLE": "Are you sure you want to clear all stored data?",
+  "CLEAR_QUESTION_DETAIL": "This will clear your list of files, folders, and apps. You cannot undo this action.",
+  "CLEAR_QUESTION_BUTTON_POSITIVE": "Clear All",
+  "CLEAR_QUESTION_BUTTON_NEGATIVE": "Cancel"
 }
