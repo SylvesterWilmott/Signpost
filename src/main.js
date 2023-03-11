@@ -23,7 +23,6 @@ let tray
 let menu
 let welcomeWin
 let preferencesWin
-let popover
 let dialogIsOpen = false
 const storedData = {}
 
@@ -36,7 +35,6 @@ app.on('ready', async function () {
   setupAppSettings()
   autoUpdater.checkForUpdatesAndNotify()
   showWelcomeWindowIfNeeded()
-  createPopover()
 
   // Prevent app from closing completely if all windows are closed
   app.on('window-all-closed', (e) => {
@@ -503,15 +501,15 @@ function registerListeners () {
   })
 
   tray.on('drag-enter', () => {
-    showPopover()
+    tray.setImage(path.join(__dirname, 'images', 'ic_drop_Template.png'))
   })
 
   tray.on('drag-leave', () => {
-    hidePopover()
+    tray.setImage(path.join(__dirname, 'images', 'ic_Template.png'))
   })
 
   tray.on('drag-end', () => {
-    hidePopover()
+    tray.setImage(path.join(__dirname, 'images', 'ic_Template.png'))
   })
 
   storage.onDidAnyChange((result) => {
@@ -699,86 +697,4 @@ function preventZoom (win) {
       e.preventDefault()
     }
   })
-}
-
-function createPopover () {
-  popover = new BrowserWindow({
-    width: 100,
-    height: 36,
-    vibrancy: 'sheet',
-    frame: false,
-    fullscreenable: false,
-    resizable: false,
-    alwaysOnTop: true,
-    minimizable: false,
-    skipTaskbar: true,
-    movable: false,
-    hiddenInMissionControl: true,
-    show: false,
-    webPreferences: {
-      contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js'),
-      spellcheck: true
-    }
-  })
-
-  preventZoom(popover)
-
-  popover.loadFile(path.join(__dirname, 'popover', 'popover.html'))
-
-  popover.once('ready-to-show', () => {
-    popover.setWindowButtonVisibility(false)
-    popover.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
-  })
-
-  popover.webContents.once('dom-ready', () => {
-    popover.webContents.send('getWindowSize')
-
-    ipcMain.on('updatePopoverWidth', (e, width) => {
-      const padding = 16
-      const newWidth = width + padding * 2
-      popover.setSize(newWidth, 36)
-      positionPopover()
-    })
-  })
-
-  popover.on('blur', () => {
-    popover.hide()
-  })
-}
-
-function positionPopover () {
-  // Position popover under tray icon
-  const winWidth = popover.getBounds().width
-  const trayBounds = tray.getBounds()
-  const display = screen.getDisplayMatching(trayBounds)
-  const displayWidth = display.bounds.width
-  const padding = 8
-
-  let newWinX = trayBounds.x - winWidth / 2 + trayBounds.width / 2
-  let newWinY = trayBounds.y + trayBounds.height + padding
-
-  const winRightEdge = newWinX + winWidth
-
-  if (winRightEdge > displayWidth - padding) {
-    newWinX = displayWidth - winWidth - padding
-  }
-
-  // Round to even numbers
-  newWinX = Math.round(newWinX / 2) * 2
-  newWinY = Math.round(newWinY / 2) * 2
-
-  popover.setPosition(newWinX, newWinY - 8)
-}
-
-function showPopover () {
-  if (popover) {
-    popover.show()
-  }
-}
-
-function hidePopover () {
-  if (popover) {
-    popover.hide()
-  }
 }
