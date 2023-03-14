@@ -23,6 +23,7 @@ let tray
 let menu
 let welcomeWin
 let preferencesWin
+let dialogWin
 let dialogIsOpen = false
 const storedData = {}
 
@@ -105,11 +106,34 @@ async function buildMenu () {
   tray.setContextMenu(menu)
 }
 
+function prepareDialogWin() {
+  if (dialogWin) return
+
+  dialogWin = new BrowserWindow({
+    alwaysOnTop: true,
+    frame: false,
+    focusable: false,
+    skipTaskbar: false,
+    transparent: true,
+    hasShadow: false,
+    opacity: 0.0
+  })
+}
+
+function destroyDialogWin() {
+  if (dialogWin) {
+    dialogWin.close()
+    dialogWin = null
+  }
+}
+
 function chooseFavourite () {
   if (dialogIsOpen === false) {
     dialogIsOpen = true
+    prepareDialogWin()
+
     dialog
-      .showOpenDialog({
+      .showOpenDialog(dialogWin, {
         message: strings.CHOOSE_PROMPT,
         buttonLabel: strings.CHOOSE,
         properties: ['openFile', 'openDirectory', 'multiSelections']
@@ -117,15 +141,18 @@ function chooseFavourite () {
       .then((result) => {
         if (result.canceled) {
           dialogIsOpen = false
+          destroyDialogWin()
           return
         }
 
         addToFavourites(result.filePaths)
         dialogIsOpen = false
+        destroyDialogWin()
       })
       .catch((err) => {
         console.log(err)
         dialogIsOpen = false
+        destroyDialogWin()
       })
   }
 }
@@ -162,8 +189,10 @@ function addToFavourites (filePaths) {
         ? `The files "${rejectedArrToStr}" were already added`
         : `The file "${rejectedArrToStr}" is already added`
 
+    prepareDialogWin()
+
     dialog
-      .showMessageBox({
+      .showMessageBox(dialogWin, {
         message: strings.ALREADY_EXISTS,
         detail: rejectedStr,
         type: 'info',
@@ -172,9 +201,11 @@ function addToFavourites (filePaths) {
       })
       .then(() => {
         updateUserFavourites(newFavourites)
+        destroyDialogWin()
       })
       .catch((err) => {
         console.log(err)
+        destroyDialogWin()
       })
 
     return
@@ -403,8 +434,10 @@ async function getFileIcon (filePath) {
 
 function handleFile (filePath, i, action) {
   if (!fs.existsSync(filePath)) {
+    prepareDialogWin()
+
     dialog
-      .showMessageBox({
+      .showMessageBox(dialogWin, {
         message: strings.FILE_NOT_FOUND,
         detail: strings.FILE_NOT_FOUND_DETAIL,
         type: 'question',
@@ -417,9 +450,12 @@ function handleFile (filePath, i, action) {
         } else if (result.response === 1) {
           removeFavourite(i)
         }
+
+        destroyDialogWin()
       })
       .catch((err) => {
         console.log(err)
+        destroyDialogWin()
       })
 
     return
@@ -435,8 +471,10 @@ function handleFile (filePath, i, action) {
 function findFile (i) {
   if (dialogIsOpen === false) {
     dialogIsOpen = true
+    prepareDialogWin()
+
     dialog
-      .showOpenDialog({
+      .showOpenDialog(dialogWin, {
         message: strings.CHOOSE_PROMPT,
         buttonLabel: strings.CHOOSE,
         properties: ['openFile', 'openDirectory']
@@ -444,6 +482,7 @@ function findFile (i) {
       .then((result) => {
         if (result.canceled) {
           dialogIsOpen = false
+          destroyDialogWin()
           return
         }
 
@@ -456,10 +495,12 @@ function findFile (i) {
         storage.set('favourites', updatedFavourites)
 
         dialogIsOpen = false
+        destroyDialogWin()
       })
       .catch((err) => {
         console.log(err)
         dialogIsOpen = false
+        destroyDialogWin()
       })
   }
 }
