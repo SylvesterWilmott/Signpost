@@ -1,7 +1,7 @@
 {
   "name": "signpost",
   "productName": "Signpost",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A quick and convenient way to access your most used apps, folders and files.",
   "main": "src/main.js",
   "repository": {
